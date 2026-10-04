@@ -1,21 +1,23 @@
-import type { JSX } from "react/jsx-runtime";
-import type React from "react";
-import { signup } from "@/features/auth/api/auth";
-import { Button } from "@/components/ui/button";
-import { CardAction, CardHeader, CardTitle, CardDescription, Card, CardFooter, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
-
+import type { JSX } from 'react/jsx-runtime';
+import type React from 'react';
+import { signup } from '@/features/auth/api/auth';
+import { Button } from '@/components/ui/button';
+import {
+  CardAction,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  Card,
+  CardFooter,
+  CardContent,
+} from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { useState } from 'react';
 
 type LoginHandler = (event?: React.MouseEvent<HTMLButtonElement>) => void;
 
-
-function SignUpHeader({
-  onToggleLogin,
-}: {
-  onToggleLogin: LoginHandler;
-}): JSX.Element {
+function SignUpHeader({ onToggleLogin }: { onToggleLogin: LoginHandler }): JSX.Element {
   return (
     <CardHeader>
       <CardTitle>Sign Up</CardTitle>
@@ -29,16 +31,11 @@ function SignUpHeader({
   );
 }
 
-
-function SignUpContent({
-  onToggleLogin,
-}: {
-  onToggleLogin: LoginHandler;
-}): JSX.Element {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [registration_code, setRegistrationCode] = useState("");
+function SignUpContent({ onToggleLogin }: { onToggleLogin: LoginHandler }): JSX.Element {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [registration_code, setRegistrationCode] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.SubmitEvent) {
@@ -49,7 +46,7 @@ function SignUpContent({
       await signup({ username, email, password, registration_code });
       onToggleLogin();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Signup failed");
+      setError(err instanceof Error ? err.message : 'Signup failed');
     }
   }
 
@@ -57,7 +54,7 @@ function SignUpContent({
     <CardContent>
       <form id="signup-form" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4">
-        <div className="grid gap-2">
+          <div className="grid gap-2">
             <Label htmlFor="username">Username</Label>
             <Input
               type="text"
@@ -121,13 +118,12 @@ function SignUpFooter(): JSX.Element {
   );
 }
 
-
 export default function SignUpForm({
   onToggleLogin,
 }: {
   onToggleLogin: LoginHandler;
 }): JSX.Element {
-    return (
+  return (
     <div className="flex min-h-screen items-center justify-center">
       <Card className="w-lg">
         <SignUpHeader onToggleLogin={onToggleLogin} />
@@ -135,5 +131,5 @@ export default function SignUpForm({
         <SignUpFooter />
       </Card>
     </div>
-    )
+  );
 }

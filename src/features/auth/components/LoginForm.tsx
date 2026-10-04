@@ -1,5 +1,5 @@
-import { useState, type JSX } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, type JSX } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardTitle,
@@ -8,20 +8,16 @@ import {
   CardAction,
   CardHeader,
   CardFooter,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { login as loginApi } from "@/features/auth/api/auth";
-import useAuth from "@/features/auth/context/UseAuth";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { login as loginApi } from '@/features/auth/api/auth';
+import useAuth from '@/features/auth/context/UseAuth';
 
 type SignUpHandler = (event?: React.MouseEvent<HTMLButtonElement>) => void;
 
-function LoginHeader({
-  onToggleSignUp,
-}: {
-  onToggleSignUp: SignUpHandler;
-}): JSX.Element {
+function LoginHeader({ onToggleSignUp }: { onToggleSignUp: SignUpHandler }): JSX.Element {
   return (
     <CardHeader>
       <CardTitle>Login to your account</CardTitle>
@@ -36,8 +32,8 @@ function LoginHeader({
 }
 
 function LoginContent(): JSX.Element {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -50,9 +46,9 @@ function LoginContent(): JSX.Element {
       const data = await loginApi({ email, password });
 
       login(data.token);
-      navigate("/home", { replace: true });
+      navigate('/home', { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+      setError(err instanceof Error ? err.message : 'Login failed');
     }
   }
 
@@ -83,8 +79,7 @@ function LoginContent(): JSX.Element {
               required
             />
           </div>
-          <div className="grid gap-2">
-          </div>
+          <div className="grid gap-2"></div>
           {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
       </form>
