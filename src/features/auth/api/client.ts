@@ -1,34 +1,46 @@
 const API_URL = import.meta.env.VITE_API_URL;
+const ACCESS_TOKEN_KEY = 'accessToken';
 
 export function getAccessToken(): string | null {
-  return localStorage.getItem('accessToken');
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
 export function setAccessToken(token: string): void {
-  localStorage.setItem('accessToken', token);
+  localStorage.setItem(ACCESS_TOKEN_KEY, token);
 }
 
-export function clearAuthData(): void {
-  localStorage.removeItem('accessToken');
+export function clearAccessToken(): void {
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+}
+
+export async function refreshAccessToken(): Promise<string> {
+  const response = await request('/refresh', { method: 'POST' });
+
+  if (!response.ok) {
+    clearAccessToken();
+    throw new Error('Session expired. Please log in again.');
+  }
+
+  const { token } = await response.json();
+  setAccessToken(token);
+
+  return token;
+}
+
+export async function logout(): Promise<void> {
+  try {
+    await request('/logout', { method: 'POST' });
+  } finally {
+    clearAccessToken();
+  }
 }
 
 export async function apiClient<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const headers = new Headers(options.headers || {});
-  headers.set('Content-Type', 'application/json');
-
-  const token = getAccessToken();
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-
-  let response = await getEndpointResponse(endpoint, options, headers);
+  let response = await authorizedRequest(endpoint, options);
 
   if (response.status === 401) {
-    const newToken = await getRefreshToken();
-    setAccessToken(newToken);
-
-    headers.set('Authorization', `Bearer ${newToken}`);
-    response = await getEndpointResponse(endpoint, options, headers);
+    await refreshAccessToken();
+    response = await authorizedRequest(endpoint, options);
   }
 
   if (!response.ok) {
@@ -39,33 +51,25 @@ export async function apiClient<T>(endpoint: string, options: RequestInit = {}):
   return response.json();
 }
 
-const getRefreshToken = async (): Promise<string> => {
-  const response = await getEndpointResponse(
-    '/refresh',
-    { method: 'POST' },
-    new Headers({ 'Content-Type': 'application/json' }),
-  );
+async function authorizedRequest(endpoint: string, options: RequestInit): Promise<Response> {
+  const headers = new Headers(options.headers || {});
 
-  if (!response.ok) {
-    clearAuthData();
-    throw new Error('Session expired. Please log in again.');
+  const token = getAccessToken();
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const { token: newToken } = await response.json();
-  setAccessToken(newToken);
+  return request(endpoint, { ...options, headers });
+}
 
-  return newToken;
-};
+/**
+ * Every call to the API goes through here, so `credentials: 'include'` is stated
+ * once. Login depends on it to have its Set-Cookie honoured, and /refresh
+ * depends on it to send that cookie back.
+ */
+export async function request(endpoint: string, options: RequestInit = {}): Promise<Response> {
+  const headers = new Headers(options.headers || {});
+  headers.set('Content-Type', 'application/json');
 
-const getEndpointResponse = async (
-  endpoint: string,
-  options: RequestInit,
-  headers: Headers,
-): Promise<Response> => {
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-    credentials: 'include',
-  });
-  return response;
-};
+  return fetch(`${API_URL}${endpoint}`, { ...options, headers, credentials: 'include' });
+}

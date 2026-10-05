@@ -1,7 +1,5 @@
-import { apiClient } from './client';
+import { apiClient, request } from './client';
 import { type User } from '../context/AuthContext';
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 export interface LoginPayload {
   email: string;
@@ -20,11 +18,7 @@ export interface LoginResponse {
 }
 
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
-  const res = await fetch(`${API_URL}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const res = await request('/login', { method: 'POST', body: JSON.stringify(payload) });
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
@@ -35,11 +29,7 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
 }
 
 export async function signup(payload: RegistrationPayload): Promise<null> {
-  const res = await fetch(`${API_URL}/signup`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
+  const res = await request('/signup', { method: 'POST', body: JSON.stringify(payload) });
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));

@@ -1,39 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import AuthContext, { type User } from './AuthContext';
 import { getMe } from '../api/auth';
-import { getAccessToken, setAccessToken, clearAuthData } from '../api/client';
+import {
+  getAccessToken,
+  setAccessToken,
+  clearAccessToken,
+  refreshAccessToken,
+  logout as logoutRequest,
+} from '../api/client';
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(() => getAccessToken());
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const logout = () => {
-    clearAuthData();
+  const logout = async () => {
+    await logoutRequest();
     setToken(null);
     setUser(null);
   };
 
-  const login = (newToken: string, newUser?: User) => {
+  const login = async (newToken: string) => {
     setAccessToken(newToken);
     setToken(newToken);
-    if (newUser) setUser(newUser);
+    setUser(await getMe());
   };
 
   useEffect(() => {
     async function initializeAuth() {
-      const storedToken = getAccessToken();
-      if (!storedToken) {
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        const userData = await getMe();
-        setUser(userData);
+        if (!getAccessToken()) {
+          await refreshAccessToken();
+        }
+
+        setUser(await getMe());
         setToken(getAccessToken());
       } catch {
-        logout();
+        clearAccessToken();
+        setToken(null);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }

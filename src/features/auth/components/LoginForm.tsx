@@ -45,7 +45,7 @@ function LoginContent(): JSX.Element {
       // @ts-ignore
       const data = await loginApi({ email, password });
 
-      login(data.token);
+      await login(data.token);
       navigate('/home', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
