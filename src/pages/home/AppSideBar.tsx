@@ -1,15 +1,20 @@
 import {
   Sidebar,
   SidebarHeader,
+  SidebarFooter,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarContent,
 } from '@/components/ui/sidebar';
-import { HouseIcon } from 'lucide-react';
+import { HouseIcon, LogOutIcon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import useAuth from '@/features/auth/context/UseAuth';
 
 function AppSideBar() {
   const { pathname } = useLocation();
+  const { logout } = useAuth();
+
   return (
     <Sidebar>
       <SidebarHeader>
@@ -26,6 +31,17 @@ function AppSideBar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+      <SidebarContent />
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={logout} tooltip="Log out">
+              <LogOutIcon />
+              <span>Log out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

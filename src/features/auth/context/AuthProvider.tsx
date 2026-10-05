@@ -15,9 +15,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const logout = async () => {
-    await logoutRequest();
-    setToken(null);
-    setUser(null);
+    try {
+      await logoutRequest();
+    } catch (error) {
+      console.warn('Logout request failed; clearing local session anyway', error);
+    } finally {
+      setToken(null);
+      setUser(null);
+    }
   };
 
   const login = async (newToken: string) => {
