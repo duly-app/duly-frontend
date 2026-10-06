@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { PlusIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { fetchNotes, type Note, type NotesResponse } from '@/features/auth/api/notes';
+import { deleteNote, fetchNotes, type Note, type NotesResponse } from '@/features/auth/api/notes';
 import { filterNotes } from './search';
-import NewNoteDialog from './NewNoteDialog';
+import NoteDialog from './NoteDialog';
 import NotesGrid from './NotesGrid';
 import SearchBar from './SearchBar';
 
@@ -12,7 +12,8 @@ function NotesViewer() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingNote, setEditingNote] = useState<Note | undefined>(undefined);
 
   useEffect(() => {
     let active = true;
@@ -33,6 +34,35 @@ function NotesViewer() {
     };
   }, []);
 
+  function openCreateDialog() {
+    setEditingNote(undefined);
+    setIsDialogOpen(true);
+  }
+
+  function openEditDialog(note: Note) {
+    setEditingNote(note);
+    setIsDialogOpen(true);
+  }
+
+  function handleSaved(saved: Note) {
+    setNotes((current) =>
+      current.some((note) => note.id === saved.id)
+        ? current.map((note) => (note.id === saved.id ? saved : note))
+        : [saved, ...current],
+    );
+  }
+
+  async function handleDelete(id: string) {
+    setError(null);
+
+    try {
+      await deleteNote(id);
+      setNotes((current) => current.filter((note) => note.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not delete the note');
+    }
+  }
+
   const visibleNotes = filterNotes(notes, search);
   const noMatches = search.trim() !== '' && visibleNotes.length === 0;
 
@@ -40,7 +70,7 @@ function NotesViewer() {
     <div className="flex min-h-0 flex-1 flex-col gap-4 p-4">
       <div className="flex items-center gap-2">
         <SearchBar value={search} onChange={setSearch} />
-        <Button onClick={() => setIsCreating(true)}>
+        <Button onClick={openCreateDialog}>
           <PlusIcon />
           New note
         </Button>
@@ -52,7 +82,9 @@ function NotesViewer() {
         <NotesGrid
           notes={visibleNotes}
           isLoading={isLoading}
-          onNewNote={() => setIsCreating(true)}
+          onNewNote={openCreateDialog}
+          onEditNote={openEditDialog}
+          onDeleteNote={handleDelete}
         />
 
         {noMatches && (
@@ -62,10 +94,11 @@ function NotesViewer() {
         )}
       </div>
 
-      <NewNoteDialog
-        open={isCreating}
-        onOpenChange={setIsCreating}
-        onCreated={(note) => setNotes((current) => [note, ...current])}
+      <NoteDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSaved={handleSaved}
+        note={editingNote}
       />
     </div>
   );

@@ -48,6 +48,10 @@ export async function apiClient<T>(endpoint: string, options: RequestInit = {}):
     throw new Error(errorData.message || 'Request failed');
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
   return response.json();
 }
 
