@@ -1,0 +1,21 @@
+import { SearchIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
+interface SearchBarProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+export default function SearchBar({ value, onChange }: SearchBarProps) {
+  return (
+    <div className="relative flex-1">
+      <SearchIcon className="absolute top-1/2 left-2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        className="pl-8"
+        placeholder="Search notes"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </div>
+  );
+}
