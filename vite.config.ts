@@ -16,6 +16,11 @@ export default defineConfig({
       usePolling: true,
     },
     proxy: {
+      // Declared before '/api' so the more specific prefix matches first.
+      '/api/chat': {
+        target: 'http://localhost:8000',
+        rewrite: (path) => path.replace(/^\/api\/chat/, ''),
+      },
       '/api': 'http://localhost:5001',
     },
   },
