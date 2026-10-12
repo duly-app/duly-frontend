@@ -1,6 +1,7 @@
 import { Bubble, BubbleContent } from '@/components/ui/bubble';
 import { Spinner } from '@/components/ui/spinner';
 import type { ChatMessage } from '@/features/chat/useChat';
+import Markdown from './Markdown';
 
 interface MessageListProps {
   messages: ChatMessage[];
@@ -24,7 +25,13 @@ export default function MessageList({ messages, isSending }: MessageListProps) {
           align={message.author === 'user' ? 'end' : 'start'}
           variant={message.author === 'user' ? 'default' : 'muted'}
         >
-          <BubbleContent className="whitespace-pre-line">{message.text}</BubbleContent>
+          {message.author === 'assistant' ? (
+            <BubbleContent className="markdown">
+              <Markdown>{message.text}</Markdown>
+            </BubbleContent>
+          ) : (
+            <BubbleContent className="whitespace-pre-line">{message.text}</BubbleContent>
+          )}
         </Bubble>
       ))}
 
