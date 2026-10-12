@@ -7,7 +7,12 @@ import NoteDialog from './NoteDialog';
 import NotesGrid from './NotesGrid';
 import SearchBar from './SearchBar';
 
-function NotesViewer() {
+interface NotesViewerProps {
+  /** Changes when something outside this component may have altered the notes. */
+  refreshKey: number;
+}
+
+function NotesViewer({ refreshKey }: NotesViewerProps) {
   const [search, setSearch] = useState('');
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +25,12 @@ function NotesViewer() {
 
     fetchNotes()
       .then((data: NotesResponse) => {
-        if (active) setNotes(data.notes);
+        if (!active) return;
+
+        setNotes(data.notes);
+        // Cleared on success, or one failed refresh leaves its message up for
+        // good. Clearing on attempt instead would blank it out mid-retry.
+        setError(null);
       })
       .catch((err) => {
         if (active) setError(err instanceof Error ? err.message : 'Could not load notes');
@@ -32,7 +42,7 @@ function NotesViewer() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [refreshKey]);
 
   function openCreateDialog() {
     setEditingNote(undefined);
