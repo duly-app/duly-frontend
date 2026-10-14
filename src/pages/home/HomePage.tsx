@@ -12,9 +12,9 @@ function HomePage() {
   const [notesVersion, setNotesVersion] = useState(0);
 
   return (
-    <SidebarProvider>
+    <SidebarProvider className="h-svh overflow-hidden">
       <AppSideBar />
-      <main className="flex min-h-svh flex-1 flex-col">
+      <main className="flex min-h-0 flex-1 flex-col">
         <div className="flex items-center border-b p-2">
           <SidebarTrigger />
           <Button
