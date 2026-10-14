@@ -6,7 +6,6 @@ RUN npm ci
 
 COPY index.html vite.config.ts tsconfig*.json components.json .env.development ./
 COPY src ./src
-COPY public ./public
 
 EXPOSE 5173
 
