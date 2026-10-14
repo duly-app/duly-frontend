@@ -18,14 +18,12 @@ export default function Notes({ note, onEdit, onDelete }: NotesProps) {
   });
 
   return (
-    <Card className="min-h-40">
+    <Card className="h-56">
       <CardHeader>
         <CardTitle className="line-clamp-1">{note.title}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1">
-        <p className="line-clamp-4 text-sm whitespace-pre-line text-muted-foreground">
-          {note.content}
-        </p>
+      <CardContent className="min-h-0 flex-1 overflow-y-auto">
+        <p className="text-sm whitespace-pre-line text-muted-foreground">{note.content}</p>
       </CardContent>
       <CardFooter className="justify-between gap-2">
         <span className="text-xs text-muted-foreground">{lastUpdated}</span>

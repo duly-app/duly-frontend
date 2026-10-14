@@ -26,7 +26,7 @@ export default function NotesGrid({
 
       {isLoading
         ? Array.from({ length: SKELETON_COUNT }, (_, index) => (
-            <Skeleton key={index} className="min-h-40 rounded-xl" />
+            <Skeleton key={index} className="h-56 rounded-xl" />
           ))
         : notes.map((note) => (
             <Notes

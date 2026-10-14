@@ -72,7 +72,7 @@ export default function NoteForm({ note, onSaved, onClose }: NoteFormProps) {
           value={content}
           onChange={(event) => setContent(event.target.value)}
           placeholder="Milk, bread, coffee"
-          rows={6}
+          className="max-h-[50vh] min-h-32 overflow-y-auto"
         />
       </div>
 

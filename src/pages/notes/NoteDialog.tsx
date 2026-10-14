@@ -13,7 +13,7 @@ interface NoteDialogProps {
 export default function NoteDialog({ open, onOpenChange, onSaved, note }: NoteDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
         <NoteForm note={note} onSaved={onSaved} onClose={() => onOpenChange(false)} />
       </DialogContent>
     </Dialog>
