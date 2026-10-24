@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { sendMessage } from './api/chat';
+import { sendDecisions, sendMessage, type ChatResponse, type PendingAction } from './api/chat';
 
 export interface ChatMessage {
   id: string;
@@ -16,6 +16,7 @@ export function useChat(onTurnComplete?: () => void) {
   const threadId = useRef(crypto.randomUUID()).current;
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [pending, setPending] = useState<PendingAction[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,18 +24,20 @@ export function useChat(onTurnComplete?: () => void) {
     setMessages((current) => [...current, { id: crypto.randomUUID(), author, text }]);
   }
 
-  async function send(text: string) {
-    const question = text.trim();
+  /** A turn either answers or stops to ask; never both. */
+  function applyTurn({ message, pending: waiting }: ChatResponse) {
+    setPending(waiting);
 
-    if (!question || isSending) return;
+    if (message) append('assistant', message);
+  }
 
+  async function run(turn: () => Promise<ChatResponse>) {
     setError(null);
     setIsSending(true);
-    append('user', question);
+    setPending([]);
 
     try {
-      const { message } = await sendMessage(threadId, question);
-      append('assistant', message);
+      applyTurn(await turn());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'The assistant could not reply');
     } finally {
@@ -43,5 +46,31 @@ export function useChat(onTurnComplete?: () => void) {
     }
   }
 
-  return { messages, isSending, error, send };
+  async function send(text: string) {
+    const question = text.trim();
+
+    if (!question || isSending) return;
+
+    append('user', question);
+
+    await run(() => sendMessage(threadId, question));
+  }
+
+  /**
+   * Answer every pending action at once. The server runs the batch as a unit,
+   * so a partial answer is refused rather than half applied.
+   */
+  async function decide(approved: boolean, reason?: string) {
+    if (pending.length === 0 || isSending) return;
+
+    const decisions = pending.map((action) => ({
+      tool_use_id: action.tool_use_id,
+      approved,
+      reason,
+    }));
+
+    await run(() => sendDecisions(threadId, decisions));
+  }
+
+  return { messages, pending, isSending, error, send, decide };
 }
